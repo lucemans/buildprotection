@@ -1,0 +1,4 @@
+name: NProtect
+version: ${project.version}
+main: lucemans.protect.Protect
+api-version: 1.13

@@ -1,0 +1,1 @@
+pscp -P 7002 -pw password ./target/protect-1.0-SNAPSHOT.jar root@lucemans.com:/root/minecraft/plugins/protect-1.0.jar
