@@ -190,7 +190,13 @@ public class LandClaim
             this.loc.getWorld().dropItemNaturally(this.loc, ItemManager.getMarker());
             int fuelCount = (this.east + this.west + this.north + this.south - 4 * LandManager.defaultRange);
             ItemStack fuel = ItemManager.getFuel();
-            fuel.setAmount(fuelCount);
+            if (fuelCount <= 64) {
+                fuel.setAmount(fuelCount);
+            } else {
+                fuel.setAmount(fuelCount % 64);
+                this.loc.getWorld().dropItemNaturally(this.loc, fuel);
+                fuel.setAmount(64);
+            }
             this.loc.getWorld().dropItemNaturally(this.loc, fuel);
         }
         for (final NInventory ninv : this.invs) {
