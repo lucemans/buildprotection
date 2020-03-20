@@ -33,6 +33,7 @@ public class SLandClaim
     public String uu;
     public int poin;
     public List<String> mem;
+    public List<String> off;
     
     public SLandClaim() {
         this.di = false;

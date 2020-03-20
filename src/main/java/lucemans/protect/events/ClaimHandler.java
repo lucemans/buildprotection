@@ -132,7 +132,12 @@ public class ClaimHandler implements Listener
     @EventHandler
     public void onBlock2(BlockPistonExtendEvent event) {
         for (Block b : event.getBlocks()) {
-            final LandClaim r = LandManager.isInClaim(b.getLocation());
+            LandClaim r = LandManager.isInClaim(b.getLocation());
+            if (r != null && !r.pistonsAllowed) {
+                event.setCancelled(true);
+                return;
+            }
+            r = LandManager.isInClaim(b.getLocation().add(event.getDirection().getDirection()));
             if (r != null && !r.pistonsAllowed) {
                 event.setCancelled(true);
                 return;
@@ -141,6 +146,7 @@ public class ClaimHandler implements Listener
         final LandClaim r2 = LandManager.isInClaim(event.getBlock().getLocation());
         if (r2 != null && !r2.pistonsAllowed) {
             event.setCancelled(true);
+            return;
         }
     }
     
@@ -468,7 +474,7 @@ public class ClaimHandler implements Listener
     
     @EventHandler
     public void onBlock22(EntityMountEvent event) {
-        if (event.getMount() instanceof Animals && event.getMount() instanceof Vehicle && event.getEntity() instanceof Player) {
+        if (event.getMount() instanceof Animals && event.getEntity() instanceof Player) {
             final LandClaim r = LandManager.isInClaim(event.getMount().getLocation());
             if (r != null && !r.canBuild((OfflinePlayer)event.getEntity()) && !r.horseRiding) {
                 event.setCancelled(true);
