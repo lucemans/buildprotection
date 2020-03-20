@@ -184,14 +184,12 @@ public class LandClaim
         if (p.getGameMode() != GameMode.CREATIVE) {
             Objects.requireNonNull(this.loc.getWorld()).dropItemNaturally(this.loc, ItemManager.getMarker());
             int fuelCount = (this.east + this.west + this.north + this.south - 4 * LandManager.defaultRange);
-            ItemStack fuel = ItemManager.getFuel();
-            while(fuelCount > 64){
-                fuel.setAmount(64);
+            while (fuelCount > 0) {
+                ItemStack fuel = ItemManager.getFuel();
+                fuel.setAmount(Math.min(fuelCount, 64));
+                fuelCount -= Math.min(fuelCount, 64);
                 this.loc.getWorld().dropItemNaturally(this.loc, fuel);
-                fuelCount -= 64;
             }
-            fuel.setAmount(fuelCount);
-            this.loc.getWorld().dropItemNaturally(this.loc, fuel);
         }
         for (final NInventory ninv : this.invs) {
             ninv.close();
