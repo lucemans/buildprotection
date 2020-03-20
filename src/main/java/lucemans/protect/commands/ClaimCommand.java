@@ -16,9 +16,9 @@ import org.bukkit.command.CommandExecutor;
 
 public class ClaimCommand implements CommandExecutor
 {
-    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
-            final Player p = (Player)sender;
+            Player p = (Player)sender;
             if (args.length == 0) {
                 p.sendMessage(ChatUtil.c("&6------ Corona Protect ------"));
                 p.sendMessage(ChatUtil.c("&7A Protection plugin by &rLucemans"));
@@ -34,7 +34,7 @@ public class ClaimCommand implements CommandExecutor
                 return true;
             }
             if (args[0].equalsIgnoreCase("info")) {
-                final LandClaim c = LandManager.isInClaim(p.getLocation());
+                LandClaim c = LandManager.isInClaim(p.getLocation());
                 if (c != null) {
                     GuiManager.openSpectatorGui(c, p);
                 }
@@ -44,7 +44,7 @@ public class ClaimCommand implements CommandExecutor
                 return true;
             }
             if (args[0].equalsIgnoreCase("open") || args[0].equalsIgnoreCase("gui") || args[0].equalsIgnoreCase("menu")) {
-                final LandClaim c = LandManager.isInClaim(p.getLocation());
+                LandClaim c = LandManager.isInClaim(p.getLocation());
                 if (c != null) {
                     c.openMenu(p);
                 }

@@ -17,7 +17,7 @@ import org.bukkit.command.CommandExecutor;
 
 public class AdminClaimCommand implements CommandExecutor
 {
-    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, final String[] args) {
         if (args.length == 0) {
             sender.sendMessage(ChatUtil.c("&6------ Corona Protect ------"));
             sender.sendMessage(ChatUtil.c("&7A Protection plugin by &rLucemans"));
@@ -25,7 +25,7 @@ public class AdminClaimCommand implements CommandExecutor
             return true;
         }
         if (sender instanceof Player) {
-            final Player p = (Player)sender;
+            Player p = (Player)sender;
             if (args[0].equalsIgnoreCase("help")) {
                 sender.sendMessage(ChatUtil.c("&6------ Corona Protect ------"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6give [name]&7 - Give all items to a player"));
@@ -37,7 +37,7 @@ public class AdminClaimCommand implements CommandExecutor
                 ItemManager.giveFuel(p);
             }
             if (args[0].equalsIgnoreCase("info")) {
-                final LandClaim c = LandManager.isInClaim(p.getLocation());
+                LandClaim c = LandManager.isInClaim(p.getLocation());
                 if (c != null) {
                     c.openMenu(p);
                 }
@@ -56,7 +56,7 @@ public class AdminClaimCommand implements CommandExecutor
                 }
             }
             if (args[0].equalsIgnoreCase("s")) {
-                final LandClaim c = LandManager.isInClaim(p.getLocation());
+                LandClaim c = LandManager.isInClaim(p.getLocation());
                 if (c != null) {
                     c.showBorder(p);
                 }
