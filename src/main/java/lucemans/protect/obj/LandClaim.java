@@ -1,11 +1,10 @@
-// 
-// Decompiled by Procyon v0.5.36
-// 
 
 package lucemans.protect.obj;
 
 import org.bukkit.Bukkit;
-import java.util.Iterator;
+
+import java.util.*;
+
 import lucemans.protect.item.ItemManager;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -22,12 +21,8 @@ import lucemans.protect.Protect;
 import org.bukkit.OfflinePlayer;
 import lucemans.protect.managers.LandManager;
 import org.bukkit.Location;
-import java.util.HashMap;
 import lucemans.ninventory.NInventory;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LandClaim
 {
@@ -187,9 +182,14 @@ public class LandClaim
         this.loc.clone().add(0.0, 1.0, 0.0).getBlock().setType(Material.AIR);
         LandManager.claims.remove(this);
         if (p.getGameMode() != GameMode.CREATIVE) {
-            this.loc.getWorld().dropItemNaturally(this.loc, ItemManager.getMarker());
+            Objects.requireNonNull(this.loc.getWorld()).dropItemNaturally(this.loc, ItemManager.getMarker());
             int fuelCount = (this.east + this.west + this.north + this.south - 4 * LandManager.defaultRange);
             ItemStack fuel = ItemManager.getFuel();
+            while(fuelCount > 64){
+                fuel.setAmount(64);
+                this.loc.getWorld().dropItemNaturally(this.loc, fuel);
+                fuelCount -= 64;
+            }
             fuel.setAmount(fuelCount);
             this.loc.getWorld().dropItemNaturally(this.loc, fuel);
         }
