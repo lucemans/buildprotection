@@ -187,7 +187,7 @@ public class LandClaim
             while (fuelCount > 0) {
                 ItemStack fuel = ItemManager.getFuel();
                 fuel.setAmount(Math.min(fuelCount, 64));
-                fuelCount -= Math.min(fuelCount, 64);
+                fuelCount -= fuel.getAmount();
                 this.loc.getWorld().dropItemNaturally(this.loc, fuel);
             }
         }
