@@ -13,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /*
  * Created by Lucemans at 06/05/2018
@@ -46,7 +47,8 @@ public class NInventory implements Listener {
         runnable = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
             public void run() {
                 if (updateTick != null)
-                    updateTick.run();
+                    if (inv.getViewers().size() > 0)
+                        updateTick.run();
             }
         }, 1, 1);
     }
@@ -124,6 +126,13 @@ public class NInventory implements Listener {
     public NInventory setUpdate(Runnable run) {
         this.updateTick = run;
         return this;
+    }
+
+    public void close() {
+        List<HumanEntity> r = new ArrayList<>(inv.getViewers());
+        for (HumanEntity p : r) {
+            p.closeInventory();
+        }
     }
 
     public static void close(Player p) {
@@ -224,10 +233,14 @@ public class NInventory implements Listener {
     public boolean compare(Inventory inv1) {
         if (inv1 == null)
             return false;
-        if (!inv1.equals(inv))
-            return false;
+//        if (!inv1.equals(inv))
+//////            return false;
 //        if (!inv1.getName().equalsIgnoreCase(inv.getName()))
 //            return false;
+        if (inv1.getType() != inv.getType())
+            return false;
+        if (inv.getViewers().size() == 0)
+            return false;
         for (HumanEntity e : inv1.getViewers()) {
             if (!inv.getViewers().contains(e))
                 return false;

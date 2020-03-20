@@ -3,3 +3,25 @@ version: ${project.version}
 main: lucemans.protect.Protect
 author: Lucemans
 api-version: 1.13
+depend: [NBTAPI, PlaceholderAPI]
+commands:
+  nprotect:
+    aliases:
+      - np
+      - lucemans.protect
+      - claim
+    permission: claim.user
+    description: Main Claim Command
+  nprotectadmin:
+    aliases:
+      - claimadmin
+      - protectadmin
+      - npa
+    permission: claim.admin
+    description: Admin Claim Command
+permissions:
+  claim.user:
+    description: User Claim Permission
+  claim.admin:
+    description: Admin Claim Permission
+
