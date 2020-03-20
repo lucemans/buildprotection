@@ -230,28 +230,21 @@ public class GuiManager
                 if (canExpand) {
                     if (fuelCount > 0) {
                         ninv.setItem(NItem.create(Material.GREEN_STAINED_GLASS_PANE).setName("&aIncrease Range").make(), 9 + offset);
-                        final Field field;
-                        final Integer n;
+
                         final ItemStack[] array;
                         int length;
                         int j = 0;
                         ItemStack i;
                         ninv.setLClick(9 + offset, () -> {
                             try {
-                                field.set(claim, n + 1);
-                                p.getInventory().getContents();
-                                length = array.length;
-                                while (j < length) {
-                                    i = array[j];
-                                    if (i != null && ItemManager.isFuel(i)) {
-                                        i.setAmount(i.getAmount() - 1);
-                                        break;
-                                    }
-                                    else {
-                                        ++j;
+                                f.set(claim, v + 1);
+                                for (ItemStack item : p.getInventory().getContents()) {
+                                        if (item != null && ItemManager.isFuel(item)) {
+                                            item.setAmount(item.getAmount() - 1);
+                                            break;
+                                        }
                                     }
                                 }
-                            }
                             catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -277,12 +270,10 @@ public class GuiManager
             ninv.setItem(item.make(), 18 + offset);
             if (v > 2) {
                 ninv.setItem(NItem.create(Material.RED_STAINED_GLASS_PANE).setName("&cDecrease Range" + value).make(), 27 + offset);
-                final Field field2;
-                final Integer n2;
                 ninv.setLClick(27 + offset, () -> {
                     try {
-                        field2.set(claim, n2 - 1);
-                        p.getInventory().addItem(new ItemStack[] { ItemManager.getFuel() });
+                        f.set(claim, v - 1);
+                        p.getInventory().addItem(ItemManager.getFuel());
                     }
                     catch (Exception e2) {
                         e2.printStackTrace();
