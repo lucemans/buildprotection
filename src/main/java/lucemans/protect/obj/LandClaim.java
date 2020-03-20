@@ -24,6 +24,8 @@ import lucemans.protect.managers.LandManager;
 import org.bukkit.Location;
 import java.util.HashMap;
 import lucemans.ninventory.NInventory;
+import org.bukkit.inventory.ItemStack;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -186,6 +188,10 @@ public class LandClaim
         LandManager.claims.remove(this);
         if (p.getGameMode() != GameMode.CREATIVE) {
             this.loc.getWorld().dropItemNaturally(this.loc, ItemManager.getMarker());
+            int fuelCount = (this.east + this.west + this.north + this.south - 4 * LandManager.defaultRange);
+            ItemStack fuel = ItemManager.getFuel();
+            fuel.setAmount(fuelCount);
+            this.loc.getWorld().dropItemNaturally(this.loc, fuel);
         }
         for (final NInventory ninv : this.invs) {
             ninv.close();
