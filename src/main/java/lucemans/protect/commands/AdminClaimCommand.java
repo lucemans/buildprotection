@@ -4,8 +4,8 @@
 
 package lucemans.protect.commands;
 
-import lucemans.protect.obj.LandClaim;
 import lucemans.protect.Protect;
+import lucemans.protect.obj.LandClaim;
 import lucemans.protect.managers.LanguageManager;
 import lucemans.protect.managers.LandManager;
 import lucemans.protect.item.ItemManager;
@@ -19,7 +19,7 @@ public class AdminClaimCommand implements CommandExecutor
 {
     public boolean onCommand(CommandSender sender, Command command, String label, final String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(ChatUtil.c("&6------ Corona Protect ------"));
+            sender.sendMessage(ChatUtil.c("&6------ Corona lucemans.protect.Protect ------"));
             sender.sendMessage(ChatUtil.c("&7A Protection plugin by &rLucemans"));
             sender.sendMessage(ChatUtil.c("&7See &rhttps://github.com/lucemans/buildprotection/wiki&7 for more info"));
             return true;
@@ -27,7 +27,7 @@ public class AdminClaimCommand implements CommandExecutor
         if (sender instanceof Player) {
             Player p = (Player)sender;
             if (args[0].equalsIgnoreCase("help")) {
-                sender.sendMessage(ChatUtil.c("&6------ Corona Protect ------"));
+                sender.sendMessage(ChatUtil.c("&6------ Corona lucemans.protect.Protect ------"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6give [name]&7 - Give all items to a player"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6info&7 - Show the claim info"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6help&7 - Show this help menu"));

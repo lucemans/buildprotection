@@ -1,6 +1,7 @@
 
 package lucemans.protect.obj;
 
+import lucemans.protect.Protect;
 import org.bukkit.Bukkit;
 
 import java.util.*;
@@ -17,93 +18,86 @@ import org.bukkit.Color;
 import lucemans.protect.gui.GuiManager;
 import java.sql.Timestamp;
 import org.bukkit.entity.Player;
-import lucemans.protect.Protect;
 import org.bukkit.OfflinePlayer;
 import lucemans.protect.managers.LandManager;
 import org.bukkit.Location;
-import lucemans.ninventory.NInventory;
+import lucemans.protect.ninventory.NInventory;
 import org.bukkit.inventory.ItemStack;
 
 public class LandClaim
 {
-    public String uuid;
-    public List<String> members;
-    public ArrayList<NInventory> invs;
-    public HashMap<String, Long> cooldown;
-    public Integer north;
-    public Integer south;
-    public Integer east;
-    public Integer west;
+    public String uuid = "";
+    public List<String> members = new ArrayList<String>();
+    public List<String> officers = new ArrayList<String>();
+    public ArrayList<NInventory> invs = new ArrayList<NInventory>();
+    public HashMap<String, Long> cooldown = new HashMap<String, Long>();
+    public Integer north = LandManager.defaultRange;
+    public Integer south = LandManager.defaultRange;
+    public Integer east = LandManager.defaultRange;
+    public Integer west = LandManager.defaultRange;
     private Location loc;
-    public boolean permitPvP;
-    public boolean mobSpawn;
-    public boolean pistonsAllowed;
-    public boolean chestPeek;
-    public boolean entityInteract;
-    public boolean blockGeneration;
-    public boolean buttonInteract;
-    public boolean pressureInteract;
-    public boolean doorInteract;
-    public boolean attackFriendly;
-    public boolean allowSetHome;
-    public boolean fenceGate;
-    public boolean horseRiding;
+    public boolean permitPvP = false;
+    public boolean mobSpawn = false;
+    public boolean pistonsAllowed = false;
+    public boolean chestPeek = false;
+    public boolean entityInteract = false;
+    public boolean blockGeneration = false;
+    public boolean buttonInteract = false;
+    public boolean pressureInteract = false;
+    public boolean doorInteract = false;
+    public boolean attackFriendly = false;
+    public boolean allowSetHome = false;
+    public boolean fenceGate = false;
+    public boolean horseRiding = false;
     
-    public LandClaim(final Location loc, final String uuid) {
-        this.uuid = "";
-        this.members = new ArrayList<String>();
-        this.invs = new ArrayList<NInventory>();
-        this.cooldown = new HashMap<String, Long>();
-        this.north = LandManager.defaultRange;
-        this.south = LandManager.defaultRange;
-        this.east = LandManager.defaultRange;
-        this.west = LandManager.defaultRange;
-        this.permitPvP = false;
-        this.mobSpawn = false;
-        this.pistonsAllowed = false;
-        this.chestPeek = false;
-        this.entityInteract = false;
-        this.blockGeneration = false;
-        this.buttonInteract = false;
-        this.pressureInteract = false;
-        this.doorInteract = false;
-        this.attackFriendly = false;
-        this.allowSetHome = false;
-        this.fenceGate = false;
-        this.horseRiding = false;
+    public LandClaim(Location loc, String uuid) {
         this.loc = loc;
         this.uuid = uuid;
     }
     
-    public boolean isInArea(final Location _l) {
+    public boolean isInArea(Location _l) {
         return _l.getWorld().getName().equals(this.loc.getWorld().getName()) && Math.floor(_l.getX()) > this.loc.getX() - this.west - 1.0 && _l.getX() < this.loc.getX() + this.east + 1.0 && Math.floor(_l.getZ()) > this.loc.getZ() - this.north - 1.0 && _l.getZ() < this.loc.getZ() + this.south + 1.0;
     }
     
-    public boolean isMarker(final Location _l) {
+    public boolean isMarker(Location _l) {
         return _l.getX() == this.loc.getX() && (_l.getY() == this.loc.getY() || _l.getY() - 1.0 == this.loc.getY()) && _l.getZ() == this.loc.getZ();
     }
-    
-    public boolean canBuild(final OfflinePlayer p) {
-        return p.getUniqueId().toString().equalsIgnoreCase(this.uuid) || this.members.contains(p.getUniqueId().toString()) || Protect.instance.admins.contains(p.getUniqueId().toString());
+
+    // Permission management
+    public boolean canBuild(OfflinePlayer p) {
+        return isPartyMember(p) || isAdmin(p);
     }
-    
-    public boolean isMember(final OfflinePlayer p) {
-        return p.getUniqueId().toString().equalsIgnoreCase(this.uuid) || this.members.contains(p.getUniqueId().toString());
+
+    public boolean isPartyMember(OfflinePlayer p) {
+        return isOfficer(p) || isMember(p);
     }
-    
-    public void openMenu(final Player p) {
+
+    public boolean isMember(OfflinePlayer p) {
+        return this.members.contains(p.getUniqueId().toString());
+    }
+
+    public boolean isOfficer(OfflinePlayer p) {
+        return this.officers.contains(p.getUniqueId().toString()) || p.getUniqueId().toString().equalsIgnoreCase(this.uuid);
+    }
+
+    public boolean isAdmin(OfflinePlayer p) {
+        return Protect.instance.admins.contains(p.getUniqueId().toString());
+    }
+
+    // Gui Handling
+    public void openMenu(Player p) {
         if (this.cooldown.containsKey(p.getUniqueId().toString()) && System.nanoTime() - new Timestamp(this.cooldown.get(p.getUniqueId().toString())).getTime() < 1000000000L) {
             return;
         }
         this.cooldown.put(p.getUniqueId().toString(), System.nanoTime());
-        if (!this.canBuild((OfflinePlayer)p)) {
+        if (!this.isOfficer(p) && !isAdmin(p)) {
             GuiManager.openSpectatorGui(this, p);
             return;
         }
-        GuiManager.openGui(this, p);
+        GuiManager.openOfficerGui(this, p);
     }
     
-    public void showBorder(final Player p) {
+    public void showBorder(Player p) {
         for (double step = 1.0, y = -4.0; y <= 4.0; y += step) {
             for (double x = -this.west; x <= this.east + 1; x += step) {
                 int z = -this.north;
@@ -128,7 +122,7 @@ public class LandClaim
         }
     }
     
-    private void showParticleCheck(final Location loc, final Player p) {
+    private void showParticleCheck(Location loc, Player p) {
         if (loc.distance(p.getLocation().clone().add(0.0, 1.75, 0.0)) < 40.0) {
             Particle.DustOptions d;
             if (Math.round(loc.getX()) % 2L == 0L || Math.round(loc.getZ()) % 2L == 0L || Math.round(loc.getY()) % 2L == 0L) {
@@ -141,7 +135,7 @@ public class LandClaim
         }
     }
     
-    public boolean onHandleBlockPlace(final Player p, final Block b) {
+    public boolean onHandleBlockPlace(Player p, Block b) {
         if (!this.canBuild((OfflinePlayer)p)) {
             p.sendMessage(LanguageManager.place_block);
             return true;
@@ -149,7 +143,7 @@ public class LandClaim
         return false;
     }
     
-    public boolean onHandleBlockBreak(final Player p, final Block b) {
+    public boolean onHandleBlockBreak(Player p, Block b) {
         if (!this.canBuild((OfflinePlayer)p)) {
             p.sendMessage(LanguageManager.break_block);
             return true;
@@ -157,7 +151,7 @@ public class LandClaim
         return false;
     }
     
-    public boolean onHandleInteractBlock(final Player p, final Block b) {
+    public boolean onHandleInteractBlock(Player p, Block b) {
         if (this.canBuild((OfflinePlayer)p)) {
             return false;
         }
@@ -169,7 +163,7 @@ public class LandClaim
         return true;
     }
     
-    public boolean onHandleEntityInteract(final Player p, final Entity e) {
+    public boolean onHandleEntityInteract(Player p, Entity e) {
         if (!this.canBuild((OfflinePlayer)p) && !this.entityInteract) {
             p.sendMessage(LanguageManager.animalTouch);
             return true;
@@ -177,7 +171,7 @@ public class LandClaim
         return false;
     }
     
-    public void triggerDestroy(final Player p) {
+    public void triggerDestroy(Player p) {
         this.loc.getBlock().setType(Material.AIR);
         this.loc.clone().add(0.0, 1.0, 0.0).getBlock().setType(Material.AIR);
         LandManager.claims.remove(this);
@@ -191,7 +185,7 @@ public class LandClaim
                 this.loc.getWorld().dropItemNaturally(this.loc, fuel);
             }
         }
-        for (final NInventory ninv : this.invs) {
+        for (NInventory ninv : this.invs) {
             ninv.close();
         }
     }
@@ -225,12 +219,13 @@ public class LandClaim
         obj.ash = this.allowSetHome;
         obj.hr = this.horseRiding;
         obj.fg = this.fenceGate;
+        obj.off = this.officers;
         return obj;
     }
     
-    public static LandClaim deserialize(final SLandClaim l) {
-        final Location loc = new Location(Bukkit.getWorld(l.wo), (double)l.x, (double)l.y, (double)l.z);
-        final LandClaim lc = new LandClaim(loc, l.uu);
+    public static LandClaim deserialize(SLandClaim l) {
+        Location loc = new Location(Bukkit.getWorld(l.wo), (double)l.x, (double)l.y, (double)l.z);
+        LandClaim lc = new LandClaim(loc, l.uu);
         lc.north = l.n;
         lc.south = l.s;
         lc.west = l.w;
@@ -249,6 +244,7 @@ public class LandClaim
         lc.horseRiding = l.hr;
         lc.fenceGate = l.fg;
         lc.members = l.mem;
+        lc.officers = l.off;
         return lc;
     }
 }

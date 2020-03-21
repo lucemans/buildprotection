@@ -1,4 +1,4 @@
-package lucemans.NovaItems;
+package lucemans.protect.NovaItems;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;

@@ -20,14 +20,14 @@ public class ClaimCommand implements CommandExecutor
         if (sender instanceof Player) {
             Player p = (Player)sender;
             if (args.length == 0) {
-                p.sendMessage(ChatUtil.c("&6------ Corona Protect ------"));
+                p.sendMessage(ChatUtil.c("&6------ Corona lucemans.protect.Protect ------"));
                 p.sendMessage(ChatUtil.c("&7A Protection plugin by &rLucemans"));
                 sender.sendMessage(ChatUtil.c("&7See &rhttps://github.com/lucemans/buildprotection/wiki&7 for more info"));
                 p.sendMessage(ChatUtil.c("&7or do &6/claim help&7 for a list of commands."));
                 return true;
             }
             if (args[0].equalsIgnoreCase("help")) {
-                sender.sendMessage(ChatUtil.c("&6------ Corona Protect ------"));
+                sender.sendMessage(ChatUtil.c("&6------ Corona lucemans.protect.Protect ------"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6open/menu/gui&7 - Opens your marker remotely"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6info&7 - Shows information on the plot you are standing in"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6help&7 - Show this help menu"));

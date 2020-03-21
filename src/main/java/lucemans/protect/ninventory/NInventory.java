@@ -1,4 +1,4 @@
-package lucemans.ninventory;
+package lucemans.protect.ninventory;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class NInventory implements Listener {
 
     private static ArrayList<NInventory> ninvs = new ArrayList<NInventory>();
 
+    private Integer id = (int) Math.round(Math.random() * 10000);
     private JavaPlugin plugin;
     private Inventory inv;
     private int runnable;
@@ -38,7 +40,7 @@ public class NInventory implements Listener {
     public NInventory(String name, int size, JavaPlugin plugin) {
         //Bukkit.getLogger().info("Created on an inventory 2.0");
         this.plugin = plugin;
-        this.inv = Bukkit.createInventory(null, size, name);
+        this.inv = Bukkit.createInventory(new NInventoryMirror(this.id), size, name);
         for (int i = 0; i < size; i++) {
             locked.put(i, true);
         }
@@ -231,20 +233,40 @@ public class NInventory implements Listener {
     }
 
     public boolean compare(Inventory inv1) {
+        Bukkit.getLogger().info("a");
         if (inv1 == null)
             return false;
-//        if (!inv1.equals(inv))
-//////            return false;
-//        if (!inv1.getName().equalsIgnoreCase(inv.getName()))
-//            return false;
-        if (inv1.getType() != inv.getType())
+        if (inv1.getHolder() == null)
             return false;
+        if (!(inv1.getHolder() instanceof NInventoryMirror) && !(inv1 instanceof PlayerInventory))
+            return false;
+        if (inv1.getType() != inv.getType()) {
+            if (inv1 instanceof PlayerInventory) {
+                Player p = (Player) inv1.getHolder();
+                try {
+                    if (p.getOpenInventory().getTopInventory().getHolder() instanceof NInventoryMirror) {
+                        if (((NInventoryMirror) p.getOpenInventory().getTopInventory().getHolder()).id == this.id) {
+                            Bukkit.getLogger().info("C");
+                            return true;
+                        }
+                    }
+                } catch (Exception e) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
         if (inv.getViewers().size() == 0)
             return false;
         for (HumanEntity e : inv1.getViewers()) {
             if (!inv.getViewers().contains(e))
                 return false;
         }
-        return true;
+        if (((NInventoryMirror) inv1.getHolder()).id == this.id) {
+            Bukkit.getLogger().info("f");
+            return true;
+        }
+        return false;
     }
 }
