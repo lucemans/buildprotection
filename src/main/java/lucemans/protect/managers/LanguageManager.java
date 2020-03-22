@@ -33,5 +33,8 @@ public class LanguageManager {
     public static String sethome = LanguageManager.prefix + "Euhm, this claim doesn't like it when you do that.";
     public static String action_enter = "Entered a protected region";
     public static String action_leave = "You have left protection";
+    public static String vehicle = "Use your legs!";
+    public static String vehicleBreak = "Don't touch other people's wheels";
+
 
 }
