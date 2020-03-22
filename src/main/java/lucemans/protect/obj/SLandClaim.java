@@ -42,5 +42,6 @@ public class SLandClaim
         this.fg = false;
         this.poin = 0;
         this.mem = new ArrayList<String>();
+        this.off = new ArrayList<String>();
     }
 }

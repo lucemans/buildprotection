@@ -4,22 +4,27 @@
 
 package lucemans.protect.events;
 
+import lucemans.protect.Protect;
+import lucemans.protect.ninventory.NInventory;
+import org.bukkit.World;
+import org.bukkit.block.EnderChest;
+import org.bukkit.block.ShulkerBox;
+import org.bukkit.entity.*;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.world.WorldInitEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.spigotmc.event.entity.EntityDismountEvent;
-import org.bukkit.entity.Vehicle;
 import org.spigotmc.event.entity.EntityMountEvent;
-import org.bukkit.entity.Horse;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Hanging;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.block.Action;
-import org.bukkit.entity.Monster;
 import org.bukkit.event.entity.EntitySpawnEvent;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.Player;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -31,7 +36,6 @@ import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -490,6 +494,42 @@ public class ClaimHandler implements Listener
             if (r != null && !r.canBuild((OfflinePlayer)event.getEntity()) && !r.horseRiding) {
                 event.setCancelled(true);
                 event.getEntity().sendMessage(LanguageManager.horseDismount);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventory(InventoryClickEvent event) {
+        if (!event.isShiftClick())
+            return;
+        if (event.getClickedInventory().equals(event.getWhoClicked().getEnderChest())) {
+            if (event.getCurrentItem() != null) {
+                if (event.getCurrentItem().getType().toString().toUpperCase().contains("SHULKER_BOX")) {
+                    Bukkit.getLogger().info("fs");
+                    Bukkit.getLogger().info(event.getCurrentItem().getItemMeta().getClass().toString());
+                    ItemStack s = event.getCurrentItem();
+                    BlockStateMeta meta = (BlockStateMeta) s.getItemMeta();
+                    if (meta.getBlockState() instanceof ShulkerBox) {
+                        ShulkerBox b = (ShulkerBox) meta.getBlockState();
+                        NInventory ninv = new NInventory("Shulker", b.getInventory().getSize(), Protect.instance);
+                        for (int i = 0; i < ninv.getInv().getSize(); i++) {
+                            if (b.getInventory().getItem(i) != null) {
+                                ninv.setItem(b.getInventory().getItem(i), i);
+                            }
+                        }
+                        ninv.unlockAll();
+                        ninv.onClosed = new Runnable() {
+                            @Override
+                            public void run() {
+                                b.getInventory().clear();
+                                b.getInventory().setContents(ninv.getInv().getContents());
+                                meta.setBlockState(b);
+                                s.setItemMeta(meta);
+                            }
+                        };
+                        event.getWhoClicked().openInventory(ninv.getInv());
+                    }
+                }
             }
         }
     }

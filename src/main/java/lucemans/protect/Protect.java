@@ -3,6 +3,7 @@ package lucemans.protect;//
 // 
 
 import lucemans.protect.ninventory.NInventory;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
@@ -91,10 +92,14 @@ public final class Protect extends JavaPlugin implements Listener
                 }
             }
         }, 1L, 2000L);
+
+        for (World w : Bukkit.getWorlds()) {
+            w.setKeepSpawnInMemory(false);
+        }
     }
-    
+
     @EventHandler
-    public void playerJoinEvent(final PlayerJoinEvent event) {
+    public void playerJoinEvent(PlayerJoinEvent event) {
         NameManager.setSuffix(event.getPlayer());
     }
     

@@ -4,16 +4,20 @@
 
 package lucemans.protect.commands;
 
+import de.tr7zw.nbtapi.NBTItem;
+import lucemans.protect.NovaItems.NItem;
 import lucemans.protect.Protect;
 import lucemans.protect.obj.LandClaim;
 import lucemans.protect.managers.LanguageManager;
 import lucemans.protect.managers.LandManager;
 import lucemans.protect.item.ItemManager;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import lucemans.protect.util.ChatUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.inventory.ItemStack;
 
 public class AdminClaimCommand implements CommandExecutor
 {
@@ -63,6 +67,11 @@ public class AdminClaimCommand implements CommandExecutor
                 else {
                     p.sendMessage("You are not in a land claim.");
                 }
+            }
+            if (args[0].equalsIgnoreCase("m")) {
+                p.getInventory().addItem(NItem.create(Material.COOKED_BEEF).setDurability((short) 2).setName("&rMarshmallow").setCustomModel(121).make());
+                p.getInventory().addItem(NItem.create(Material.COOKED_BEEF).setDurability((short) 2).setName("&rAvocado Potato").setCustomModel(122).make());
+                p.getInventory().addItem(NItem.create(Material.COOKIE).setDurability((short) 2).setName("&rOreo").setCustomModel(123).make());
             }
         }
         return true;
