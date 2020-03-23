@@ -1,4 +1,4 @@
-package lucemans.ninventory;
+package lucemans.protect.ninventory;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -6,9 +6,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -23,10 +25,13 @@ public class NInventory implements Listener {
 
     private static ArrayList<NInventory> ninvs = new ArrayList<NInventory>();
 
+    private Integer id = (int) Math.round(Math.random() * 10000);
     private JavaPlugin plugin;
     private Inventory inv;
     private int runnable;
     public Runnable updateTick;
+    public boolean autodestroy = true;
+    public Runnable onClosed;
     public HashMap<Integer, Boolean> locked = new HashMap<Integer, Boolean>();
     public HashMap<Integer, Runnable> lclick = new HashMap<Integer, Runnable>();
     public HashMap<Integer, Runnable> rclick = new HashMap<Integer, Runnable>();
@@ -36,9 +41,8 @@ public class NInventory implements Listener {
     public HashMap<Integer, Runnable> mclick = new HashMap<Integer, Runnable>();
 
     public NInventory(String name, int size, JavaPlugin plugin) {
-        //Bukkit.getLogger().info("Created on an inventory 2.0");
         this.plugin = plugin;
-        this.inv = Bukkit.createInventory(null, size, name);
+        this.inv = Bukkit.createInventory(new NInventoryMirror(this.id), size, name);
         for (int i = 0; i < size; i++) {
             locked.put(i, true);
         }
@@ -143,16 +147,22 @@ public class NInventory implements Listener {
 
     // Handlers
 
-    /*@EventHandler
+    @EventHandler
     public void onInventory(InventoryCloseEvent event) {
-        if (event.getInventory() == inv)
-        {
-            destroy();
+        if (compare(event.getInventory())) {
+            if (onClosed != null)
+                onClosed.run();
+            if (getInv().getViewers().size() == 0 && autodestroy) {
+                destroy();
+            }
         }
-    }*/
+    }
+
     @EventHandler
     public void onInventory(InventoryClickEvent event) {
         if (compare(event.getClickedInventory())) {
+            if (!this.locked.get(event.getSlot()))
+                return;
             switch (event.getClick()) {
                 case LEFT:
                     if (lclick.get(event.getSlot()) != null)
@@ -180,52 +190,18 @@ public class NInventory implements Listener {
                     break;
             }
             event.setCancelled(true);
-        } else {
-            /*if (event.isShiftClick())
-            {
-                if (compare(event.getInventory()))
-                {
-                    // User clicks item in own inv with our inv is open.
-                    event.setCancelled(true);
-                }
-            }
-            if (event.getClick() == ClickType.MIDDLE) {
-                Bukkit.getLogger().info("MIDDLE");
-                event.setCancelled(true);
-            }
-            if (event.getAction() == InventoryAction.CLONE_STACK) {
-                Bukkit.getLogger().info("CLONE");
-                event.setCancelled(true);
-            }*/
         }
     }
 
-    /*@EventHandler
-    public void onInventory(InventoryDragEvent event) {
-        if (event.getInventory() == inv)
-        {
-            event.setCancelled(true);
-        }
-    }*/
-    /*@EventHandler
-    public void onInventory(InventoryInteractEvent event) {
-        if (compare(event.getInventory()))
-        {
-            event.setCancelled(true);
-        }
-    }*/
     @EventHandler
     public void onInventory(InventoryMoveItemEvent event) {
         if (compare(event.getDestination())) {
-            //Bukkit.getLogger().info("DESTINATION");
             event.setCancelled(true);
         }
         if (compare(event.getSource())) {
-            //Bukkit.getLogger().info("SOURCE");
             event.setCancelled(true);
         }
         if (compare(event.getInitiator())) {
-            //Bukkit.getLogger().info("INITIATOR");
             event.setCancelled(true);
         }
     }
@@ -233,18 +209,32 @@ public class NInventory implements Listener {
     public boolean compare(Inventory inv1) {
         if (inv1 == null)
             return false;
-//        if (!inv1.equals(inv))
-//////            return false;
-//        if (!inv1.getName().equalsIgnoreCase(inv.getName()))
-//            return false;
-        if (inv1.getType() != inv.getType())
+        if (inv1.getHolder() == null)
             return false;
+        if (!(inv1.getHolder() instanceof NInventoryMirror) && !(inv1 instanceof PlayerInventory))
+            return false;
+        if (inv1.getType() != inv.getType()) {
+            if (inv1 instanceof PlayerInventory) {
+                Player p = (Player) inv1.getHolder();
+                try {
+                    if (p.getOpenInventory().getTopInventory().getHolder() instanceof NInventoryMirror) {
+                        if (((NInventoryMirror) p.getOpenInventory().getTopInventory().getHolder()).id.equals(this.id)) {
+                            return true;
+                        }
+                    }
+                } catch (Exception e) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
         if (inv.getViewers().size() == 0)
             return false;
         for (HumanEntity e : inv1.getViewers()) {
             if (!inv.getViewers().contains(e))
                 return false;
         }
-        return true;
+        return ((NInventoryMirror) inv1.getHolder()).id.equals(this.id);
     }
 }

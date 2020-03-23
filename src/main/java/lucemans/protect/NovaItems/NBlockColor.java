@@ -1,4 +1,4 @@
-package lucemans.NovaItems;
+package lucemans.protect.NovaItems;
 
 public enum NBlockColor {
 

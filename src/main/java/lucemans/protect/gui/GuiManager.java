@@ -4,6 +4,7 @@
 
 package lucemans.protect.gui;
 
+import lucemans.protect.Protect;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import lucemans.protect.util.ChatUtil;
@@ -16,18 +17,16 @@ import org.bukkit.DyeColor;
 import org.bukkit.inventory.meta.BannerMeta;
 import lucemans.protect.managers.LandManager;
 import lucemans.protect.item.ItemManager;
-import java.util.Iterator;
+
 import java.util.List;
 import org.bukkit.OfflinePlayer;
 import java.util.ArrayList;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import lucemans.NovaItems.NItem;
+import lucemans.protect.NovaItems.NItem;
 import org.bukkit.Material;
-import org.bukkit.plugin.java.JavaPlugin;
-import lucemans.ninventory.NInventory;
-import lucemans.protect.Protect;
+import lucemans.protect.ninventory.NInventory;
 import org.bukkit.Bukkit;
 import java.util.UUID;
 import org.bukkit.entity.Player;
@@ -35,7 +34,7 @@ import lucemans.protect.obj.LandClaim;
 
 public class GuiManager
 {
-    public static void openGui(final LandClaim claim, final Player p) {
+    public static void openOfficerGui(LandClaim claim, Player p) {
         final NInventory ninv = new NInventory(Bukkit.getOfflinePlayer(UUID.fromString(claim.uuid)).getName() + "'s Marker", 27, Protect.instance);
         claim.invs.add(ninv);
         ninv.setItem(NItem.create(Material.PLAYER_HEAD).setName("&rTeam").setDescription("&7Modify claim permissions.", "").make(), 11);
@@ -65,12 +64,13 @@ public class GuiManager
             @Override
             public void run() {
                 GuiManager.openSettings(claim, p);
+                System.out.println(p.getName() + " clicked settings.");
             }
         });
         p.openInventory(ninv.getInv());
     }
     
-    public static void openTeam(final LandClaim claim, final Player p) {
+    public static void openTeam(LandClaim claim, Player p) {
         final int c = (int)(Math.ceil(claim.members.size() / 9.0) * 9.0);
         final NInventory ninv = new NInventory("Team Editor", 9 + ((c > 1) ? c : 9), Protect.instance);
         claim.invs.add(ninv);
@@ -85,25 +85,64 @@ public class GuiManager
                 GuiManager.addNewPeople(claim, p);
             }
         });
+        int f = 1;
+        ItemStack item3 = NItem.create(Material.PLAYER_HEAD).setItemFlag(ItemFlag.HIDE_ENCHANTS).setItemFlag(ItemFlag.HIDE_ATTRIBUTES).setEnchantment(Enchantment.DAMAGE_ALL, 0).setDescription("&6Owner", "", "&a&lShift + Left Click&r to demote to member.", "&c&lShift + Right Click&r to revoke access.").setName(Bukkit.getOfflinePlayer(UUID.fromString(claim.uuid)).getName()).make();
+        SkullMeta meta3 = (SkullMeta)item3.getItemMeta();
+        meta3.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(claim.uuid)));
+        item3.setItemMeta((ItemMeta)meta3);
+        ninv.setItem(item3, 9);
+        for (int i = 0; i < claim.officers.size(); ++i) {
+            int x = i;
+            ItemStack item2 = NItem.create(Material.PLAYER_HEAD).setItemFlag(ItemFlag.HIDE_ENCHANTS).setItemFlag(ItemFlag.HIDE_ATTRIBUTES).setEnchantment(Enchantment.DAMAGE_ALL, 0).setDescription("&aOfficer", "", "&a&lShift + Left Click&r to demote to member.", "&c&lShift + Right Click&r to revoke access.").setName(Bukkit.getOfflinePlayer(UUID.fromString(claim.officers.get(x))).getName()).make();
+            SkullMeta meta = (SkullMeta)item2.getItemMeta();
+            meta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(claim.officers.get(x))));
+            item2.setItemMeta((ItemMeta)meta);
+            ninv.setItem(item2, f + 9);
+            ninv.setShiftLClick(f + 9, new Runnable() {
+                @Override
+                public void run() {
+                    claim.members.add(claim.officers.get(x));
+                    claim.officers.remove(claim.officers.get(x));
+                    GuiManager.openTeam(claim, p);
+                }
+            });
+            ninv.setShiftRClick(f + 9, new Runnable() {
+                @Override
+                public void run() {
+                    claim.officers.remove(claim.officers.get(x));
+                    GuiManager.openTeam(claim, p);
+                }
+            });
+            f++;
+        }
         for (int i = 0; i < claim.members.size(); ++i) {
-            final int x = i;
-            final ItemStack item2 = NItem.create(Material.PLAYER_HEAD).setDescription("", "&c&lShift + Right Click&r to revoke access.").setName(Bukkit.getOfflinePlayer(UUID.fromString(claim.members.get(x))).getName()).make();
-            final SkullMeta meta = (SkullMeta)item2.getItemMeta();
+            int x = i;
+            ItemStack item2 = NItem.create(Material.PLAYER_HEAD).setDescription("&7Member", "", "&a&lShift + Left Click&r to promote to Officer.", "&c&lShift + Right Click&r to revoke access.").setName(Bukkit.getOfflinePlayer(UUID.fromString(claim.members.get(x))).getName()).make();
+            SkullMeta meta = (SkullMeta)item2.getItemMeta();
             meta.setOwningPlayer(Bukkit.getOfflinePlayer(UUID.fromString(claim.members.get(x))));
             item2.setItemMeta((ItemMeta)meta);
-            ninv.setItem(item2, i + 9);
-            ninv.setShiftRClick(i + 9, new Runnable() {
+            ninv.setItem(item2, f + 9);
+            ninv.setShiftRClick(f + 9, new Runnable() {
                 @Override
                 public void run() {
                     claim.members.remove(claim.members.get(x));
                     GuiManager.openTeam(claim, p);
                 }
             });
+            ninv.setShiftLClick(f + 9, new Runnable() {
+                @Override
+                public void run() {
+                    claim.officers.add(claim.members.get(x));
+                    claim.members.remove(claim.members.get(x));
+                    GuiManager.openTeam(claim, p);
+                }
+            });
+            f++;
         }
         p.openInventory(ninv.getInv());
     }
     
-    public static void addNewPeople(final LandClaim claim, final Player p) {
+    public static void addNewPeople(LandClaim claim, Player p) {
         final List<Player> pp = new ArrayList<Player>();
         for (final Player _p : Bukkit.getOnlinePlayers()) {
             if (claim.isInArea(_p.getLocation()) && !claim.members.contains(_p.getUniqueId().toString()) && !claim.uuid.equalsIgnoreCase(_p.getUniqueId().toString())) {
@@ -129,10 +168,10 @@ public class GuiManager
         p.openInventory(ninv.getInv());
     }
     
-    public static void openResources(final LandClaim claim, final Player p) {
+    public static void openResources(LandClaim claim, Player p) {
     }
     
-    public static void openMap(final LandClaim claim, final Player p) {
+    public static void openMap(LandClaim claim, Player p) {
         final NInventory ninv = new NInventory("Area Editor", 45, Protect.instance);
         claim.invs.add(ninv);
         final Integer limit = 32;
@@ -219,7 +258,7 @@ public class GuiManager
         p.openInventory(ninv.getInv());
     }
     
-    public static void setIncreaseMenu(final NInventory ninv, final LandClaim claim, final Player p, final Integer offset, final ItemStack banner, final Integer fuelCount, final String value, final boolean canExpand) {
+    public static void setIncreaseMenu(NInventory ninv, LandClaim claim, Player p, Integer offset, ItemStack banner, Integer fuelCount, String value, boolean canExpand) {
         final ItemStack nf = NItem.create(Material.GRAY_STAINED_GLASS_PANE).setName("&c&lNo Fuel").make();
         final ItemStack lr = NItem.create(Material.BARRIER).setName("&c&lLimit Reached").make();
         final ItemStack overlap = NItem.create(Material.YELLOW_STAINED_GLASS_PANE).setName("&eWARNING &rArea Overlap").make();
@@ -287,7 +326,7 @@ public class GuiManager
         }
     }
     
-    public static void openDestroy(final LandClaim claim, final Player p) {
+    public static void openDestroy(LandClaim claim, Player p) {
         final NInventory ninv = new NInventory("Destroy Claim", 27, Protect.instance);
         claim.invs.add(ninv);
         final Runnable destroy = new Runnable() {
@@ -317,7 +356,7 @@ public class GuiManager
         p.openInventory(ninv.getInv());
     }
     
-    public static void openSettings(final LandClaim claim, final Player p) {
+    public static void openSettings(LandClaim claim, Player p) {
         final NInventory ninv = new NInventory("Claim Settings", 45, Protect.instance);
         claim.invs.add(ninv);
         ninv.setUpdate(new Runnable() {
@@ -497,7 +536,7 @@ public class GuiManager
         p.openInventory(ninv.getInv());
     }
     
-    public static void openSpectatorGui(final LandClaim claim, final Player p) {
+    public static void openSpectatorGui(LandClaim claim, Player p) {
         p.sendMessage(ChatUtil.c("&8----------- &bMarker Information &8-------------"));
         p.sendMessage(ChatUtil.c("              "));
         String owners = "";
@@ -529,11 +568,11 @@ public class GuiManager
         }
     }
     
-    private static String _set(final boolean val, final String name) {
+    private static String _set(boolean val, String name) {
         return ChatUtil.c("&7" + name + ": " + (val ? "&aYes" : "&cNo ") + "&r");
     }
     
-    public static void openPeekGui(final Player p, final Container c, final Block b) {
+    public static void openPeekGui(Player p, Container c, Block b) {
         final NInventory ninv = new NInventory("Not allowed", c.getInventory().getSize(), Protect.instance);
         ninv.setUpdate(new Runnable() {
             @Override

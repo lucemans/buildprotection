@@ -4,22 +4,26 @@
 
 package lucemans.protect.commands;
 
-import lucemans.protect.obj.LandClaim;
+import de.tr7zw.nbtapi.NBTItem;
+import lucemans.protect.NovaItems.NItem;
 import lucemans.protect.Protect;
+import lucemans.protect.obj.LandClaim;
 import lucemans.protect.managers.LanguageManager;
 import lucemans.protect.managers.LandManager;
 import lucemans.protect.item.ItemManager;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import lucemans.protect.util.ChatUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.inventory.ItemStack;
 
 public class AdminClaimCommand implements CommandExecutor
 {
     public boolean onCommand(CommandSender sender, Command command, String label, final String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(ChatUtil.c("&6------ Corona Protect ------"));
+            sender.sendMessage(ChatUtil.c("&6------ Corona lucemans.protect.Protect ------"));
             sender.sendMessage(ChatUtil.c("&7A Protection plugin by &rLucemans"));
             sender.sendMessage(ChatUtil.c("&7See &rhttps://github.com/lucemans/buildprotection/wiki&7 for more info"));
             return true;
@@ -27,7 +31,7 @@ public class AdminClaimCommand implements CommandExecutor
         if (sender instanceof Player) {
             Player p = (Player)sender;
             if (args[0].equalsIgnoreCase("help")) {
-                sender.sendMessage(ChatUtil.c("&6------ Corona Protect ------"));
+                sender.sendMessage(ChatUtil.c("&6------ Corona lucemans.protect.Protect ------"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6give [name]&7 - Give all items to a player"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6info&7 - Show the claim info"));
                 sender.sendMessage(ChatUtil.c("&7&l» &6help&7 - Show this help menu"));
@@ -63,6 +67,11 @@ public class AdminClaimCommand implements CommandExecutor
                 else {
                     p.sendMessage("You are not in a land claim.");
                 }
+            }
+            if (args[0].equalsIgnoreCase("m")) {
+                p.getInventory().addItem(NItem.create(Material.COOKED_BEEF).setDurability((short) 2).setName("&rMarshmallow").setCustomModel(121).make());
+                p.getInventory().addItem(NItem.create(Material.COOKED_BEEF).setDurability((short) 2).setName("&rAvocado Potato").setCustomModel(122).make());
+                p.getInventory().addItem(NItem.create(Material.COOKIE).setDurability((short) 2).setName("&rOreo").setCustomModel(123).make());
             }
         }
         return true;

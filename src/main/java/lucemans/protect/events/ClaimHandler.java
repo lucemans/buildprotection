@@ -4,8 +4,19 @@
 
 package lucemans.protect.events;
 
-import org.bukkit.entity.*;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import lucemans.protect.Protect;
+import lucemans.protect.ninventory.NInventory;
+import org.bukkit.World;
+import org.bukkit.block.EnderChest;
+import org.bukkit.block.ShulkerBox;
+import org.bukkit.entity.*;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.world.WorldInitEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.spigotmc.event.entity.EntityDismountEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
@@ -128,7 +139,12 @@ public class ClaimHandler implements Listener
     @EventHandler
     public void pushInClaim(BlockPistonExtendEvent event) {
         for (Block b : event.getBlocks()) {
-            final LandClaim r = LandManager.isInClaim(b.getLocation());
+            LandClaim r = LandManager.isInClaim(b.getLocation());
+            if (r != null && !r.pistonsAllowed) {
+                event.setCancelled(true);
+                return;
+            }
+            r = LandManager.isInClaim(b.getLocation().add(event.getDirection().getDirection()));
             if (r != null && !r.pistonsAllowed) {
                 event.setCancelled(true);
                 return;
@@ -137,6 +153,7 @@ public class ClaimHandler implements Listener
         final LandClaim r2 = LandManager.isInClaim(event.getBlock().getLocation());
         if (r2 != null && !r2.pistonsAllowed) {
             event.setCancelled(true);
+            return;
         }
     }
     
@@ -554,4 +571,38 @@ public class ClaimHandler implements Listener
         }
     }
 
+    public void onInventory(InventoryClickEvent event) {
+        if (!event.isShiftClick())
+            return;
+        if (event.getClickedInventory().equals(event.getWhoClicked().getEnderChest())) {
+            if (event.getCurrentItem() != null) {
+                if (event.getCurrentItem().getType().toString().toUpperCase().contains("SHULKER_BOX")) {
+                    Bukkit.getLogger().info("fs");
+                    Bukkit.getLogger().info(event.getCurrentItem().getItemMeta().getClass().toString());
+                    ItemStack s = event.getCurrentItem();
+                    BlockStateMeta meta = (BlockStateMeta) s.getItemMeta();
+                    if (meta.getBlockState() instanceof ShulkerBox) {
+                        ShulkerBox b = (ShulkerBox) meta.getBlockState();
+                        NInventory ninv = new NInventory("Shulker", b.getInventory().getSize(), Protect.instance);
+                        for (int i = 0; i < ninv.getInv().getSize(); i++) {
+                            if (b.getInventory().getItem(i) != null) {
+                                ninv.setItem(b.getInventory().getItem(i), i);
+                            }
+                        }
+                        ninv.unlockAll();
+                        ninv.onClosed = new Runnable() {
+                            @Override
+                            public void run() {
+                                b.getInventory().clear();
+                                b.getInventory().setContents(ninv.getInv().getContents());
+                                meta.setBlockState(b);
+                                s.setItemMeta(meta);
+                            }
+                        };
+                        event.getWhoClicked().openInventory(ninv.getInv());
+                    }
+                }
+            }
+        }
+    }
 }

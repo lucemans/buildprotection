@@ -1,13 +1,12 @@
-// 
+package lucemans.protect;//
 // Decompiled by Procyon v0.5.36
 // 
 
-package lucemans.protect;
-
+import lucemans.protect.ninventory.NInventory;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
-import java.util.Iterator;
 import lucemans.protect.managers.NameManager;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Recipe;
@@ -93,14 +92,23 @@ public final class Protect extends JavaPlugin implements Listener
                 }
             }
         }, 1L, 2000L);
+
+        for (World w : Bukkit.getWorlds()) {
+            w.setKeepSpawnInMemory(false);
+        }
     }
-    
+
     @EventHandler
-    public void playerJoinEvent(final PlayerJoinEvent event) {
+    public void playerJoinEvent(PlayerJoinEvent event) {
         NameManager.setSuffix(event.getPlayer());
     }
     
     public void onDisable() {
+        try {
+            NInventory.destroyAll();
+        } catch (Exception e) {
+
+        }
         FileManager.saveFile();
         try {
             Bukkit.removeRecipe(this.key);
