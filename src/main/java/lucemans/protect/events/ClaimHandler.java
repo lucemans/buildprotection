@@ -4,6 +4,7 @@
 
 package lucemans.protect.events;
 
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import lucemans.protect.Protect;
 import lucemans.protect.ninventory.NInventory;
 import org.bukkit.World;
@@ -28,6 +29,8 @@ import org.bukkit.event.entity.EntitySpawnEvent;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
+
+import java.util.Objects;
 import java.util.UUID;
 import lucemans.protect.util.ChatUtil;
 import net.md_5.bungee.api.ChatMessageType;
@@ -126,7 +129,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock(BlockBreakEvent event) {
+    public void playerBlockBreak(BlockBreakEvent event) {
         LandClaim r = LandManager.isInClaim(event.getBlock().getLocation());
         if (r != null && r.onHandleBlockBreak(event.getPlayer(), event.getBlock())) {
             event.setCancelled(true);
@@ -134,7 +137,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock2(BlockPistonExtendEvent event) {
+    public void pushInClaim(BlockPistonExtendEvent event) {
         for (Block b : event.getBlocks()) {
             LandClaim r = LandManager.isInClaim(b.getLocation());
             if (r != null && !r.pistonsAllowed) {
@@ -155,7 +158,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock2(BlockPistonRetractEvent event) {
+    public void pullFromClaim(BlockPistonRetractEvent event) {
         for (final Block b : event.getBlocks()) {
             final LandClaim r = LandManager.isInClaim(b.getLocation());
             if (r != null && !r.pistonsAllowed) {
@@ -170,7 +173,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock4(BlockExplodeEvent event) {
+    public void ExplodeBlock(BlockExplodeEvent event) {
         final LandClaim r = LandManager.isInClaim(event.getBlock().getLocation());
         if (r != null) {
             event.setCancelled(true);
@@ -178,7 +181,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock5(EntityExplodeEvent event) {
+    public void ExplosionsEnabled(EntityExplodeEvent event) {
         for (final Block b : event.blockList()) {
             final LandClaim r = LandManager.isInClaim(b.getLocation());
             if (r != null) {
@@ -188,7 +191,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock6(PlayerShearEntityEvent event) {
+    public void shearSheep(PlayerShearEntityEvent event) {
         final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
         if (r != null && r.onHandleEntityInteract(event.getPlayer(), event.getEntity())) {
             event.setCancelled(true);
@@ -196,7 +199,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock7(EntityDamageByEntityEvent event) {
+    public void tntDamage(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof TNTPrimed) {
             final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
             if (r != null) {
@@ -206,7 +209,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock8(PlayerLeashEntityEvent event) {
+    public void leashAnimal(PlayerLeashEntityEvent event) {
         final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
         if (r != null && !r.canBuild((OfflinePlayer)event.getPlayer())) {
             event.setCancelled(true);
@@ -214,7 +217,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock9(BlockFormEvent event) {
+    public void cobbleGen(BlockFormEvent event) {
         final LandClaim r = LandManager.isInClaim(event.getBlock().getLocation());
         if (r != null && !r.blockGeneration) {
             event.setCancelled(true);
@@ -222,10 +225,11 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock10(ExplosionPrimeEvent event) {
+    public void cancelPrime(ExplosionPrimeEvent event) {
         final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
         if (r != null) {
             event.setCancelled(true);
+            event.getEntity().remove();
         }
     }
     
@@ -255,7 +259,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock11(EntityDamageByEntityEvent event) {
+    public void pvp(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
             int b = 0;
             LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
@@ -298,7 +302,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock12(EntityDamageByEntityEvent event) {
+    public void passiveDamage(EntityDamageByEntityEvent event) {
         if (event.getEntity() instanceof Animals && event.getDamager() instanceof Player) {
             final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
             if (r != null && !r.canBuild((OfflinePlayer)event.getDamager()) && !r.attackFriendly) {
@@ -309,7 +313,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock13(EntitySpawnEvent event) {
+    public void hostileSpawn(EntitySpawnEvent event) {
         if (event.getEntity() instanceof Monster) {
             final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
             if (r != null && !r.mobSpawn) {
@@ -319,7 +323,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock14(PlayerInteractEvent event) {
+    public void pPressurePlateInteract(PlayerInteractEvent event) {
         if (event.getAction() == Action.PHYSICAL) {
             final LandClaim r = LandManager.isInClaim(event.getPlayer().getLocation());
             if (r != null && !r.canBuild((OfflinePlayer)event.getPlayer()) && !r.pressureInteract) {
@@ -329,7 +333,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock15(EntityInteractEvent event) {
+    public void entityPressurePlateInteract(EntityInteractEvent event) {
         if (event.getBlock().getType().toString().toUpperCase().contains("PRESSURE_PLATE")) {
             final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
             if (r != null && !r.pressureInteract) {
@@ -337,9 +341,23 @@ public class ClaimHandler implements Listener
             }
         }
     }
+
+    @EventHandler
+    public void shootButton(EntityInteractEvent event){
+        if (event.getBlock().getType().toString().toUpperCase().contains("BUTTON")){
+            LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
+            if (event.getEntity() instanceof Projectile && r != null){
+                if( ((Projectile) event.getEntity()).getShooter() instanceof Player){
+                    if (!r.canBuild((OfflinePlayer) Objects.requireNonNull(((Projectile) event.getEntity()).getShooter()))) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+    }
     
     @EventHandler
-    public void onBlock16(PlayerInteractEvent event) {
+    public void pressButton(PlayerInteractEvent event) {
         if (event.getClickedBlock() != null) {
             if (event.getClickedBlock().getType().toString().toUpperCase().contains("BUTTON")) {
                 final LandClaim r = LandManager.isInClaim(event.getClickedBlock().getLocation());
@@ -366,7 +384,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock16(EntityDamageByEntityEvent event) {
+    public void itemFrameProjectile(EntityDamageByEntityEvent event) {
         if (event.getEntity() instanceof Hanging) {
             final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
             if (r != null) {
@@ -396,7 +414,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock17(PlayerInteractEntityEvent event) {
+    public void rCItemFrame(PlayerInteractEntityEvent event) {
         if (event.getRightClicked() instanceof Hanging) {
             final LandClaim r = LandManager.isInClaim(event.getRightClicked().getLocation());
             if (r != null && !r.canBuild((OfflinePlayer)event.getPlayer())) {
@@ -407,7 +425,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock18(PlayerInteractEvent event) {
+    public void placeItemFrame(PlayerInteractEvent event) {
         if (event.getItem() != null) {
             if (event.getItem().getType() == Material.ITEM_FRAME && event.getClickedBlock() != null) {
                 final LandClaim r = LandManager.isInClaim(event.getClickedBlock().getLocation());
@@ -427,7 +445,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock19(HangingBreakByEntityEvent event) {
+    public void itemFramePlayerBreak(HangingBreakByEntityEvent event) {
         final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
         if (r != null) {
             if (event.getRemover() instanceof Player) {
@@ -455,7 +473,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock20(PlayerCommandPreprocessEvent event) {
+    public void homeInClaim(PlayerCommandPreprocessEvent event) {
         if (event.getMessage().split(" ")[0].contains("sethome")) {
             final LandClaim r = LandManager.isInClaim(event.getPlayer().getLocation());
             if (r != null && !r.canBuild((OfflinePlayer)event.getPlayer()) && !r.allowSetHome) {
@@ -466,7 +484,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock21(PlayerInteractAtEntityEvent event) {
+    public void rightClickHorse(PlayerInteractAtEntityEvent event) {
         if (event.getRightClicked() instanceof Horse) {
             final LandClaim r = LandManager.isInClaim(event.getRightClicked().getLocation());
             if (r != null && !r.canBuild((OfflinePlayer)event.getPlayer()) && !r.horseRiding) {
@@ -477,8 +495,8 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock22(EntityMountEvent event) {
-        if (event.getMount() instanceof Animals && event.getEntity() instanceof Player) {
+    public void mountHorse(EntityMountEvent event) {
+        if (event.getMount() instanceof Animals && event.getMount() instanceof Vehicle && event.getEntity() instanceof Player) {
             final LandClaim r = LandManager.isInClaim(event.getMount().getLocation());
             if (r != null && !r.canBuild((OfflinePlayer)event.getEntity()) && !r.horseRiding) {
                 event.setCancelled(true);
@@ -488,7 +506,7 @@ public class ClaimHandler implements Listener
     }
     
     @EventHandler
-    public void onBlock23(EntityDismountEvent event) {
+    public void dismountHorse(EntityDismountEvent event) {
         if (event.getDismounted() instanceof Animals && event.getDismounted() instanceof Vehicle && event.getEntity() instanceof Player) {
             final LandClaim r = LandManager.isInClaim(event.getDismounted().getLocation());
             if (r != null && !r.canBuild((OfflinePlayer)event.getEntity()) && !r.horseRiding) {
@@ -499,6 +517,60 @@ public class ClaimHandler implements Listener
     }
 
     @EventHandler
+    public void rightClickVehicle(EntityMountEvent event) {
+        if (event.getEntity() instanceof Player && event.getMount() instanceof Vehicle) {
+            final LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
+            if (r != null && !r.canBuild((OfflinePlayer)event.getEntity()) && !r.entityInteract) {
+                event.setCancelled(true);
+                event.getEntity().sendMessage(LanguageManager.vehicle);
+            }
+        }
+    }
+
+    public void breakVehicle(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player && event.getEntity() instanceof Vehicle) {
+            int b = 0;
+            LandClaim r = LandManager.isInClaim(event.getEntity().getLocation());
+            if (r != null) {
+                b = 1;
+            }
+            if (b == 0) {
+                r = LandManager.isInClaim(event.getDamager().getLocation());
+                if (r != null) {
+                    b = 2;
+                }
+            }
+            if (b > 0) {
+                event.getDamager().sendMessage((b == 1) ? LanguageManager.vehicleBreak : LanguageManager.vehicleBreak);
+                event.setCancelled(true);
+            }
+        }
+
+        if (event.getEntity() instanceof Vehicle && event.getDamager() instanceof Projectile) {
+            Projectile p = (Projectile) event.getDamager();
+            if (p.getShooter() instanceof Player) {
+                Player p2 = (Player) p.getShooter();
+                int b = 0;
+                LandClaim r = LandManager.isInClaim(p.getLocation());
+                if (r != null) {
+                    b = 1;
+                }
+                if (b == 0) {
+                    r = LandManager.isInClaim(p2.getLocation());
+                    if (r != null) {
+                        b = 2;
+                    }
+                }
+                if (b > 0) {
+                    p2.sendMessage((b == 1) ? LanguageManager.vehicleBreak : LanguageManager.vehicleBreak);
+                    event.setCancelled(true);
+                }
+            } else if (p.getShooter() instanceof Monster){
+                event.setCancelled(true);
+            }
+        }
+    }
+
     public void onInventory(InventoryClickEvent event) {
         if (!event.isShiftClick())
             return;
