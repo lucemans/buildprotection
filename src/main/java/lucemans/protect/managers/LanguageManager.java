@@ -33,8 +33,11 @@ public class LanguageManager {
     public static String sethome = LanguageManager.prefix + "Euhm, this claim doesn't like it when you do that.";
     public static String action_enter = "Entered a protected region";
     public static String action_leave = "You have left protection";
-    public static String vehicle = "Use your legs!";
-    public static String vehicleBreak = "Don't touch other people's wheels";
-
+    public static String vehicle = LanguageManager.prefix + "Use your legs!";
+    public static String vehicleBreak = LanguageManager.prefix + "Don't touch other people's wheels!";
+    public static String fishing = LanguageManager.prefix + "What a catch!";
+    public static String redstone = LanguageManager.prefix + "How about, you mess with your own logic.";
+    public static String flowerpot2 = LanguageManager.prefix + "Yup, its empty";
+    public static String flowerpot = LanguageManager.prefix + "Go get your own flowers!";
 
 }

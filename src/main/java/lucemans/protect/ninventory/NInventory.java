@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -160,8 +161,10 @@ public class NInventory implements Listener {
 
     @EventHandler
     public void onInventory(InventoryClickEvent event) {
+        if (event.getClickedInventory() == null)
+            return;
         if (compare(event.getClickedInventory())) {
-            if (!this.locked.get(event.getSlot()))
+            if (this.locked.containsKey(event.getSlot()) && !this.locked.get(event.getSlot()))
                 return;
             switch (event.getClick()) {
                 case LEFT:
@@ -195,14 +198,18 @@ public class NInventory implements Listener {
 
     @EventHandler
     public void onInventory(InventoryMoveItemEvent event) {
-        if (compare(event.getDestination())) {
-            event.setCancelled(true);
-        }
-        if (compare(event.getSource())) {
-            event.setCancelled(true);
-        }
-        if (compare(event.getInitiator())) {
-            event.setCancelled(true);
+        if (event.getDestination().getType() == InventoryType.CHEST || event.getInitiator().getType() == InventoryType.CHEST || event.getSource().getType() == InventoryType.CHEST) {
+            if (event.getDestination().getType() == InventoryType.PLAYER || event.getInitiator().getType() == InventoryType.PLAYER || event.getSource().getType() == InventoryType.PLAYER) {
+                if (compare(event.getDestination())) {
+                    event.setCancelled(true);
+                }
+                if (compare(event.getSource())) {
+                    event.setCancelled(true);
+                }
+                if (compare(event.getInitiator())) {
+                    event.setCancelled(true);
+                }
+            }
         }
     }
 
@@ -235,6 +242,8 @@ public class NInventory implements Listener {
             if (!inv.getViewers().contains(e))
                 return false;
         }
+        if (!(inv1.getHolder() instanceof NInventoryMirror))
+            return false;
         return ((NInventoryMirror) inv1.getHolder()).id.equals(this.id);
     }
 }

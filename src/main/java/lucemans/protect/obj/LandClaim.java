@@ -9,6 +9,7 @@ import java.util.*;
 import lucemans.protect.item.ItemManager;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
 import org.bukkit.block.Container;
 import lucemans.protect.managers.LanguageManager;
@@ -156,8 +157,10 @@ public class LandClaim
             return false;
         }
         if (b.getState() instanceof Container && this.chestPeek) {
-            GuiManager.openPeekGui(p, (Container)b.getState(), b);
-            return true;
+            if (((Container) b.getState()) instanceof Chest) {
+                GuiManager.openPeekGui(p, (Container) b.getState(), b);
+                return true;
+            }
         }
         p.sendMessage(LanguageManager.open_inventory);
         return true;

@@ -1,0 +1,6 @@
+POST https://mcapi.coronacraft.nl/exec
+Content-Type: application/json
+
+{"cmd": "plugman reload nprotect"}
+
+###

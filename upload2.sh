@@ -1,0 +1,1 @@
+scp -P 7004 ./target/protect-1.0-SNAPSHOT.jar root@lucemans.com:/root/mc1/plugins/protect-1.0.jar
